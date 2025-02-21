@@ -1,5 +1,6 @@
 package rpg;
 
+import rpg.Characters.Troll;
 import rpg.Events.*;
 import java.util.Scanner;
 
@@ -27,35 +28,43 @@ public class Scenario {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Événement final
-        AbstractEvent end = new EventNoChoice("Félicitations, vous avez terminé l'aventure !", scanner, null);
+        // 📌 Événements finaux
+        AbstractEvent death = new EventNoChoice("Tu as pris le mauvais chemin et es tombé dans un piège mortel...", scanner, null);
+        AbstractEvent victory = new EventNoChoice("Bravo ! Tu as trouvé le trésor caché de la grotte !", scanner, null);
+        AbstractEvent escape = new EventNoChoice("Tu as choisi de quitter la grotte sans prendre de risques.", scanner, null);
 
-        // Scénario : Combat ou fuite
-        AbstractEvent fight = new EventNoChoice("Vous entrez en combat et gagnez !", scanner, end);
-        AbstractEvent flee = new EventNoChoice("Vous prenez la fuite et survivez !", scanner, end);
+        // 📌 Fouille pour trouver le mot de passe
+        AbstractEvent findPassword = new EventNoChoice("Tu fouilles la pièce... et trouves un vieux parchemin avec le mot : 'DRAGON'.", scanner, null);
 
-        // Question au joueur
-        AbstractEvent booleanChoice = new EventBooleanChoice(
-                "Un monstre apparaît ! Voulez-vous combattre ? (oui/non)", scanner, fight, flee, "oui"
+        // 📌 Vérification du mot de passe pour entrer dans la grotte
+        AbstractEvent passwordCheck = new EventBooleanChoice(
+                "Une porte verrouillée bloque le passage. Quel est le mot de passe ?", scanner, victory, death, "dragon"
         );
 
-        // Bifurcation
-        AbstractEvent choiceEvent = new EventMultipleChoice(
-                "Vous arrivez à une bifurcation, choisissez votre chemin :",
+        // 📌 Le troll peut aider ou désinformer
+        Troll troll = new Troll();
+        AbstractEvent trollInteraction = new EventInteractionCharacter(
+                "Le Troll te regarde...", scanner, troll, passwordCheck, death
+        );
+
+        // 📌 Options disponibles : Fouiller, parler au Troll ou partir
+        AbstractEvent roomOptions = new EventMultipleChoice(
+                "Tu es dans une pièce sombre. Que fais-tu ?",
                 scanner,
-                booleanChoice,
-                new EventNoChoice("Vous tombez dans un piège et mourrez...", scanner, null)
+                findPassword,  // Option 1 : Fouiller la pièce pour trouver le mot de passe
+                trollInteraction, // Option 2 : Parler au Troll pour un indice
+                escape         // Option 3 : Quitter la grotte sans tenter d'entrer
         );
 
-        // Correction ici : On met plus d'événements pour que le hasard soit plus varié
-        AbstractEvent randomEvent = new EventRandomChoice(
-                "Un événement aléatoire se produit !", scanner, choiceEvent, booleanChoice
-        );
+        // 📌 Point de départ du jeu
+        AbstractEvent start = new EventNoChoice("Tu es perdu dans une grotte sombre...", scanner, roomOptions);
 
-        Scenario scenario = new Scenario(randomEvent);
+        // 📌 Lancement du scénario
+        Scenario scenario = new Scenario(start);
         scenario.run();
 
         scanner.close();
     }
+
 
 }

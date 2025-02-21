@@ -7,7 +7,7 @@ public class Troll implements CharacterRPG {
 
     @Override
     public String activate() {
-        return "Demande-moi ton chemin, et je te montrerai la voie !";
+        return "Mot de passe de la grotte!";
     }
 
     @Override
