@@ -17,7 +17,7 @@ public abstract class AbstractEvent {
 
     public String promptPlayer() {
         System.out.println(text);
-        System.out.print(DefaultSettings.PROMPT_PLAYER);
+        System.out.println(DefaultSettings.PROMPT_PLAYER);
         return inputScanner.nextLine();
     }
 
