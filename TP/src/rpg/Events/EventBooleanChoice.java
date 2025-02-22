@@ -16,7 +16,6 @@ public class EventBooleanChoice extends AbstractEvent {
 
     @Override
     public AbstractEvent run() {
-        System.out.println(text);
         String answer = promptPlayer().toLowerCase();
 
         return answer.equals(truth) ? eventTrue : eventFalse;

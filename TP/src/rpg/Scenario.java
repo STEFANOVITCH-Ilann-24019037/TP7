@@ -29,42 +29,47 @@ public class Scenario {
         Scanner scanner = new Scanner(System.in);
 
         // 📌 Événements finaux
-        AbstractEvent death = new EventNoChoice("Tu as pris le mauvais chemin et es tombé dans un piège mortel...", scanner, null);
-        AbstractEvent victory = new EventNoChoice("Bravo ! Tu as trouvé le trésor caché de la grotte !", scanner, null);
-        AbstractEvent escape = new EventNoChoice("Tu as choisi de quitter la grotte sans prendre de risques.", scanner, null);
+        AbstractEvent death = new EventNoChoice("Le troll éclate de rire et t'écrase d'un coup de massue... Fin tragique.", scanner, null);
+        AbstractEvent victory = new EventNoChoice("Le troll hoche la tête et se pousse lentement, révélant un passage secret. Tu continues ton aventure !", scanner, null);
 
-        // 📌 Fouille pour trouver le mot de passe
-        AbstractEvent findPassword = new EventNoChoice("Tu fouilles la pièce... et trouves un vieux parchemin avec le mot : 'DRAGON'.", scanner, null);
+        // 📌 Fouille de la grotte (avec chance de trouver le mot de passe)
+        AbstractEvent foundNothing = new EventNoChoice("Tu fouilles sous les pierres moussues... mais tu ne trouves rien d'utile.", scanner, null);
+        AbstractEvent foundPassword = new EventNoChoice("Sous une pierre, tu découvres un vieux parchemin : 'Mot de passe : DRAGON'.", scanner, null);
 
-        // 📌 Vérification du mot de passe pour entrer dans la grotte
-        AbstractEvent passwordCheck = new EventBooleanChoice(
-                "Une porte verrouillée bloque le passage. Quel est le mot de passe ?", scanner, victory, death, "dragon"
-        );
-
-        // 📌 Le troll peut aider ou désinformer
-        Troll troll = new Troll();
-        AbstractEvent trollInteraction = new EventInteractionCharacter(
-                "Le Troll te regarde...", scanner, troll, passwordCheck, death
-        );
-
-        // 📌 Options disponibles : Fouiller, parler au Troll ou partir
-        AbstractEvent roomOptions = new EventMultipleChoice(
-                "Tu es dans une pièce sombre. Que fais-tu ?",
+        AbstractEvent searchCave = new EventRandomChoice(
+                "Tu fouilles la grotte...",
                 scanner,
-                findPassword,  // Option 1 : Fouiller la pièce pour trouver le mot de passe
-                trollInteraction, // Option 2 : Parler au Troll pour un indice
-                escape         // Option 3 : Quitter la grotte sans tenter d'entrer
+                foundNothing,  // 50% de chances de ne rien trouver
+                foundPassword  // 50% de chances de trouver le mot de passe
         );
 
-        // 📌 Point de départ du jeu
-        AbstractEvent start = new EventNoChoice("Tu es perdu dans une grotte sombre...", scanner, roomOptions);
+        // 📌 Vérification du mot de passe par le Troll
+        AbstractEvent trollPasswordCheck = new EventBooleanChoice(
+                "Le troll te fixe et ricane : 'Ah, un voyageur égaré... Si tu veux passer cette porte, donne-moi le mot de passe !'",
+                scanner,
+                victory,  // Mot de passe correct
+                death,    // Mauvaise réponse = mort
+                "DRAGON"
+        );
+
+        // 📌 Rencontre avec le Troll
+        AbstractEvent talkToTroll = new EventNoChoice("Tu t'approches du troll, qui te fixe de ses petits yeux jaunes...", scanner, trollPasswordCheck);
+
+        // 📌 Premier choix du joueur
+        AbstractEvent firstChoice = new EventMultipleChoice(
+                "Le joueur se réveille dans une grotte sombre et humide. L'air est froid, et l'odeur de mousse et de pierre emplit ses narines. Devant lui, une immense porte de pierre est gardée par un troll imposant, assis sur un rocher. Ses petits yeux jaunes brillent dans l'obscurité, et un large sourire dévoile ses dents jaunies.\nQue fais-tu ?",
+                scanner,
+                searchCave,   // Choix 1 : Fouiller la grotte
+                talkToTroll   // Choix 2 : Parler au troll
+        );
 
         // 📌 Lancement du scénario
-        Scenario scenario = new Scenario(start);
+        Scenario scenario = new Scenario(firstChoice);
         scenario.run();
 
         scanner.close();
     }
+
 
 
 }
